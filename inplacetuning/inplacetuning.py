@@ -13,15 +13,67 @@ import numpy as np
 from scipy.optimize import minimize
 
 def _name_to_inverval(pair):
-    '''Get interval from pair of notes.'''
+    '''Lookup interval from pair of notes.'''
 
     return {
+
+        ('cbb', 'cbb'): 'P1',
+        ('cbb', 'cb'): 'A1',
+        ('cbb', 'dbbbb'): 'd2',
+        ('cbb', 'dbbb'): 'm2',
+        ('cbb', 'dbb'): 'M2',
+        ('cbb', 'db'): 'A2',
+        ('cbb', 'ebbbb'): 'd3',
+        ('cbb', 'ebbb'): 'm3',
+        ('cbb', 'ebb'): 'M3',
+        ('cbb', 'eb'): 'A3',
+        ('cbb', 'fbbb'): 'd4',
+        ('cbb', 'fbb'): 'P4',
+        ('cbb', 'fb'): 'A4',
+        ('cbb', 'gbbb'): 'd5',
+        ('cbb', 'gbb'): 'P5',
+        ('cbb', 'gb'): 'A5',
+        ('cbb', 'abbbb'): 'd6',
+        ('cbb', 'abbb'): 'm6',
+        ('cbb', 'abb'): 'M6',
+        ('cbb', 'ab'): 'A6',
+        ('cbb', 'bbbbb'): 'd7',
+        ('cbb', 'bbbb'): 'm7',
+        ('cbb', 'bbb'): 'M7',
+        ('cbb', 'bb'): 'A7',
+        ('cbb', 'cbbb'): 'd8',
+
         ('cb', 'cb'): 'P1',
+        ('cb', 'c'): 'A1',
+        ('cb', 'dbbb'): 'd2',
+        ('cb', 'dbb'): 'm2',
+        ('cb', 'db'): 'M2',
+        ('cb', 'd'): 'A2',
+        ('cb', 'ebbb'): 'd3',
+        ('cb', 'ebb'): 'm3',
+        ('cb', 'eb'): 'M3',
+        ('cb', 'e'): 'A3',
+        ('cb', 'fbb'): 'd4',
+        ('cb', 'fb'): 'P4',
+        ('cb', 'f'): 'A4',
+        ('cb', 'gbb'): 'd5',
+        ('cb', 'gb'): 'P5',
+        ('cb', 'g'): 'A5',
+        ('cb', 'abbb'): 'd6',
+        ('cb', 'abb'): 'm6',
+        ('cb', 'ab'): 'M6',
+        ('cb', 'a'): 'A6',
+        ('cb', 'bbbb'): 'd7',
+        ('cb', 'bbb'): 'm7',
+        ('cb', 'bb'): 'M7',
+        ('cb', 'b'): 'A7',
+        ('cb', 'cbb'): 'd8',
 
         ('c', 'c'): 'P1',
         ('c', 'c#'): 'A1',
-        ('c', 'db'): 'm2',
+        ('c', 'c##'): 'm2', # technically?
         ('c', 'dbb'): 'd2',
+        ('c', 'db'): 'm2',
         ('c', 'd'): 'M2',
         ('c', 'd#'): 'A2',
         ('c', 'ebb'): 'd3',
@@ -38,13 +90,39 @@ def _name_to_inverval(pair):
         ('c', 'ab'): 'm6',
         ('c', 'a'): 'M6',
         ('c', 'a#'): 'A6',
-        ('c', 'cbb'): 'd7',
-        ('c', 'cb'): 'm7',
+        ('c', 'bbb'): 'd7',
+        ('c', 'bb'): 'm7',
         ('c', 'b'): 'M7',
         ('c', 'b#'): 'A7',
         ('c', 'cb'): 'd8',
 
         ('c#', 'c#'): 'P1',
+        ('c#', 'c##'): 'A1',
+        ('c#', 'db'): 'd2',
+        ('c#', 'd'): 'm2',
+        ('c#', 'd#'): 'M2',
+        ('c#', 'd##'): 'A2',
+        ('c#', 'eb'): 'd3',
+        ('c#', 'e'): 'm3',
+        ('c#', 'e#'): 'M3',
+        ('c#', 'e##'): 'A3',
+        ('c#', 'f'): 'd4',
+        ('c#', 'f#'): 'P4',
+        ('c#', 'f##'): 'A4',
+        ('c#', 'g'): 'd5',
+        ('c#', 'g#'): 'P5',
+        ('c#', 'g##'): 'A5',
+        ('c#', 'ab'): 'd6',
+        ('c#', 'a'): 'm6',
+        ('c#', 'a#'): 'M6',
+        ('c#', 'a##'): 'A6',
+        ('c#', 'bb'): 'd7',
+        ('c#', 'b'): 'm7',
+        ('c#', 'b#'): 'M7',
+        ('c#', 'b##'): 'A7',
+        ('c#', 'c'): 'd8',
+
+        ('c##', 'c##'): 'P1',
 
         ('dbb', 'dbb'): 'P1',
 
@@ -60,6 +138,8 @@ def _name_to_inverval(pair):
 
         ('d#', 'd#'): 'P1',
 
+        ('d##', 'd##'): 'P1',
+
         ('ebb', 'ebb'): 'P1',
 
         ('eb', 'eb'): 'P1',
@@ -74,6 +154,8 @@ def _name_to_inverval(pair):
 
         ('e#', 'e#'): 'P1',
 
+        ('e##', 'e##'): 'P1',
+
         ('fb', 'fb'): 'P1',
 
         ('f', 'f'): 'P1',
@@ -85,6 +167,8 @@ def _name_to_inverval(pair):
         ('f', 'e'): 'M7',
 
         ('f#', 'f#'): 'P1',
+
+        ('f##', 'f##'): 'P1',
 
         ('gb', 'gb'): 'P1',
 
@@ -98,15 +182,19 @@ def _name_to_inverval(pair):
 
         ('g#', 'g#'): 'P1',
 
+        ('g##', 'g##'): 'P1',
+
         ('abb', 'abb'): 'P1',
         ('abb', 'c'): 'A3',
 
         ('ab', 'ab'): 'P1',
         ('ab', 'c'): 'M3',
+        ('ab', 'c#'): 'A3',
 
         ('a', 'a'): 'P1',
         ('a', 'b'): 'M2',
         ('a', 'c'): 'm3',
+        ('a', 'c#'): 'M3',
         ('a', 'd'): 'P4',
         ('a', 'e'): 'P5',
         ('a', 'f'): 'm6',
@@ -114,15 +202,21 @@ def _name_to_inverval(pair):
 
         ('a#', 'a#'): 'P1',
         ('a#', 'c'): 'd3',
+        ('a#', 'c#'): 'm3',
+
+        ('a##', 'a##'): 'P1',
+        ('a##', 'c#'): 'd3',
 
         ('bbb', 'bbb'): 'P1',
         ('bbb', 'c'): 'A2',
 
         ('bb', 'bb'): 'P1',
         ('bb', 'c'): 'M2',
+        ('bb', 'c#'): 'A2',
 
         ('b', 'b'): 'P1',
         ('b', 'c'): 'm2',
+        ('b', 'c#'): 'M2',
         ('b', 'd'): 'm3',
         ('b', 'e'): 'P4',
         ('b', 'f'): 'd5',
@@ -131,6 +225,10 @@ def _name_to_inverval(pair):
 
         ('b#', 'b#'): 'P1',
         ('b#', 'c'): 'd2',
+        ('b#', 'c#'): 'm2',
+
+        ('b##', 'b##'): 'P1',
+        ('b##', 'c#'): 'd2',
 
     }[pair]
 
@@ -188,13 +286,13 @@ def inplacetuning(notes):
 
     # Make sure notes provided are valid
     _notenames = [
-        'a', 'a#', 'ab', 'abb',
-        'b', 'b#', 'bb', 'bbb',
-        'c', 'c#', 'cb', 'cbb',
-        'd', 'd#', 'db', 'dbb',
-        'e', 'e#', 'eb', 'ebb',
-        'f', 'f#', 'fb', 'fbb',
-        'g', 'g#', 'gb', 'gbb'
+        'a', 'a#', 'a##', 'ab', 'abb',
+        'b', 'b#', 'b##', 'bb', 'bbb',
+        'c', 'c#', 'c##', 'cb', 'cbb',
+        'd', 'd#', 'd##', 'db', 'dbb',
+        'e', 'e#', 'e##', 'eb', 'ebb',
+        'f', 'f#', 'f##', 'fb', 'fbb',
+        'g', 'g#', 'g##', 'gb', 'gbb'
     ]
     assert all([n0 in _notenames for n0 in notes]), (
         'Invalid note name provided!')
@@ -239,28 +337,35 @@ def inplacetuning(notes):
         'abb': 783.99,
         'ab': 415.30,
         'a': 440,
-        'bbb': 440,
         'a#': 466.16,
+        'a##': 493.88,
+        'bbb': 440,
         'bb': 466.16,
         'b': 493.88,
         'b#': 523.25,
+        'b##': 554.37,
         'cb': 493.88,
         'c': 523.25,
-        'dbb': 523.25,
         'c#': 554.37,
+        'c##': 587.33,
+        'dbb': 523.25,
         'db': 554.37,
         'd': 587.33,
-        'ebb': 587.33,
         'd#': 622.25,
+        'd##': 659.25,
+        'ebb': 587.33,
         'eb': 622.25,
         'e': 659.25,
         'e#': 698.46,
+        'e##': 739.99,
         'fb': 659.25,
         'f': 698.46,
         'f#': 739.99,
+        'f##': 783.99,
         'gb': 739.99,
         'g': 783.99,
         'g#': 830.61,
+        'g##': 440,
     }
     freq_init = [_nominal_freqs[n0] for n0 in notes]
     ratio_init = _get_ratios(freq_init)
