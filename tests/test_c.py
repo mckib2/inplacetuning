@@ -18,6 +18,13 @@ class TestC(unittest.TestCase):
             ['c', 'c'])
         self.assertTrue(all(_conds(rdes, ropt, rinit)))
 
+    def test_A1(self):
+        '''[C, C#]'''
+        _fopt, _feq, ropt, rdes, rinit, _cost = inplacetuning(
+            ['c', 'c#'])
+        self.assertTrue(all(_conds(rdes, ropt, rinit)))
+
+
     def test_d2(self):
         '''[C, Dbb]'''
         _fopt, _feq, ropt, rdes, rinit, _cost = inplacetuning(
@@ -154,12 +161,6 @@ class TestC(unittest.TestCase):
         '''[C, Cb]'''
         _fopt, _feq, ropt, rdes, rinit, _cost = inplacetuning(
             ['c', 'cb'])
-        self.assertTrue(all(_conds(rdes, ropt, rinit)))
-
-    def test_A8(self):
-        '''[C, C#]'''
-        _fopt, _feq, ropt, rdes, rinit, _cost = inplacetuning(
-            ['c', 'c#'])
         self.assertTrue(all(_conds(rdes, ropt, rinit)))
 
 if __name__ == '__main__':
