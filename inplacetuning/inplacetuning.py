@@ -12,6 +12,128 @@ from collections import OrderedDict
 import numpy as np
 from scipy.optimize import minimize
 
+def _name_to_inverval(pair):
+    '''Get interval from pair of notes.'''
+
+    return {
+        ('cb', 'cb'): 'P1',
+
+        ('c', 'c'): 'P1',
+        ('c', 'c#'): 'A1',
+        ('c', 'db'): 'm2',
+        ('c', 'dbb'): 'd2',
+        ('c', 'd'): 'M2',
+        ('c', 'd#'): 'A2',
+        ('c', 'ebb'): 'd3',
+        ('c', 'eb'): 'm3',
+        ('c', 'e'): 'M3',
+        ('c', 'e#'): 'A3',
+        ('c', 'fb'): 'd4',
+        ('c', 'f'): 'P4',
+        ('c', 'f#'): 'A4',
+        ('c', 'gb'): 'd5',
+        ('c', 'g'): 'P5',
+        ('c', 'g#'): 'A5',
+        ('c', 'abb'): 'd6',
+        ('c', 'ab'): 'm6',
+        ('c', 'a'): 'M6',
+        ('c', 'a#'): 'A6',
+        ('c', 'cbb'): 'd7',
+        ('c', 'cb'): 'm7',
+        ('c', 'b'): 'M7',
+        ('c', 'b#'): 'A7',
+        ('c', 'cb'): 'd8',
+
+        ('c#', 'c#'): 'P1',
+
+        ('dbb', 'dbb'): 'P1',
+
+        ('db', 'db'): 'P1',
+
+        ('d', 'd'): 'P1',
+        ('d', 'e'): 'M2',
+        ('d', 'f'): 'm3',
+        ('d', 'g'): 'P4',
+        ('d', 'a'): 'P5',
+        ('d', 'b'): 'M6',
+        ('d', 'c'): 'm7',
+
+        ('d#', 'd#'): 'P1',
+
+        ('ebb', 'ebb'): 'P1',
+
+        ('eb', 'eb'): 'P1',
+
+        ('e', 'e'): 'P1',
+        ('e', 'f'): 'm2',
+        ('e', 'g'): 'm3',
+        ('e', 'a'): 'P4',
+        ('e', 'b'): 'P5',
+        ('e', 'c'): 'm6',
+        ('e', 'd'): 'm7',
+
+        ('e#', 'e#'): 'P1',
+
+        ('fb', 'fb'): 'P1',
+
+        ('f', 'f'): 'P1',
+        ('f', 'g'): 'M2',
+        ('f', 'a'): 'M3',
+        ('f', 'b'): 'A4',
+        ('f', 'c'): 'P5',
+        ('f', 'd'): 'M6',
+        ('f', 'e'): 'M7',
+
+        ('f#', 'f#'): 'P1',
+
+        ('gb', 'gb'): 'P1',
+
+        ('g', 'g'): 'P1',
+        ('g', 'a'): 'M2',
+        ('g', 'b'): 'M3',
+        ('g', 'c'): 'P4',
+        ('g', 'd'): 'P5',
+        ('g', 'e'): 'M6',
+        ('g', 'f'): 'm7',
+
+        ('g#', 'g#'): 'P1',
+
+        ('abb', 'abb'): 'P1',
+        ('abb', 'c'): 'A3',
+
+        ('ab', 'ab'): 'P1',
+        ('ab', 'c'): 'M3',
+
+        ('a', 'a'): 'P1',
+        ('a', 'b'): 'M2',
+        ('a', 'c'): 'm3',
+        ('a', 'd'): 'P4',
+        ('a', 'e'): 'P5',
+        ('a', 'f'): 'm6',
+        ('a', 'g'): 'm7',
+
+        ('a#', 'a#'): 'P1',
+        ('a#', 'c'): 'd3',
+
+        ('bbb', 'bbb'): 'P1',
+        ('bbb', 'c'): 'A2',
+
+        ('bb', 'bb'): 'P1',
+        ('bb', 'c'): 'M2',
+
+        ('b', 'b'): 'P1',
+        ('b', 'c'): 'm2',
+        ('b', 'd'): 'm3',
+        ('b', 'e'): 'P4',
+        ('b', 'f'): 'd5',
+        ('b', 'g'): 'm6',
+        ('b', 'a'): 'm7',
+
+        ('b#', 'b#'): 'P1',
+        ('b#', 'c'): 'd2',
+
+    }[pair]
+
 def combinations(x):
     '''Pairwise combinations in predictable order.'''
 
@@ -64,8 +186,16 @@ def inplacetuning(notes):
     # Sanity checks
     assert isinstance(notes, list), 'Must have a list of notes!'
 
-    # Make sure notes provided are valid -- only diatonic currently
-    _notenames = ['a', 'b', 'c', 'd', 'e', 'f', 'g']
+    # Make sure notes provided are valid
+    _notenames = [
+        'a', 'a#', 'ab', 'abb',
+        'b', 'b#', 'bb', 'bbb',
+        'c', 'c#', 'cb', 'cbb',
+        'd', 'd#', 'db', 'dbb',
+        'e', 'e#', 'eb', 'ebb',
+        'f', 'f#', 'fb', 'fbb',
+        'g', 'g#', 'gb', 'gbb'
+    ]
     assert all([n0 in _notenames for n0 in notes]), (
         'Invalid note name provided!')
 
@@ -77,94 +207,60 @@ def inplacetuning(notes):
     # notes. I'll call this the "semantics" of the note group
     _semantics = {
         'P1': 1, # unison
-        'P8': 2, # octave
-        'P5': 3/2, # perfect fifth
-        'P4': 4/3, # perfect fourth
-        'M6': 5/3, # major sixth
-        'M3': 5/4, # major third
-        'm6': 8/5, # minor sixth
-        'm3': 6/5, # minor third
-        'M2': 9/8, # major second
+        'A1': 25/24, # augmented unison
+        'd2': 128/125, # dimished second
         'm2': 16/15, # minor second
-        'd5': 25/18, # dimished fifth
+        'M2': 9/8, # major second
+        'A2': 75/64, # augmented second
+        'd3': 144/125, # dimished third
+        'm3': 6/5, # minor third
+        'M3': 5/4, # major third
+        'A3': 125/96, # Augmented third
+        'd4': 32/25, # dimished fourth
+        'P4': 4/3, # perfect fourth
         'A4': 45/32, # augmented fourth
+        'd5': 25/18, # dimished fifth
+        'P5': 3/2, # perfect fifth
+        'A5': 25/16, # augmented fifth
+        'm6': 8/5, # minor sixth
+        'M6': 5/3, # major sixth
         'm7': 16/9, # minor seventh
         'M7': 15/8, # major seventh
-    }
-
-    # Map pairwise relationships to desired ratios -- only supports
-    # diatonic currently
-    _map = {
-        'cc': 'P1',
-        'cd': 'M2',
-        'ce': 'M3',
-        'cf': 'P4',
-        'cg': 'P5',
-        'ca': 'M6',
-        'cb': 'M7',
-
-        'dd': 'P1',
-        'de': 'M2',
-        'df': 'm3',
-        'dg': 'P4',
-        'da': 'P5',
-        'db': 'M6',
-        'dc': 'm7',
-
-        'ee': 'P1',
-        'ef': 'm2',
-        'eg': 'm3',
-        'ea': 'P4',
-        'eb': 'P5',
-        'ec': 'm6',
-        'ed': 'm7',
-
-        'ff': 'P1',
-        'fg': 'M2',
-        'fa': 'M3',
-        'fb': 'A4',
-        'fc': 'P5',
-        'fd': 'M6',
-        'fe': 'M7',
-
-        'gg': 'P1',
-        'ga': 'M2',
-        'gb': 'M3',
-        'gc': 'P4',
-        'gd': 'P5',
-        'ge': 'M6',
-        'gf': 'm7',
-
-        'aa': 'P1',
-        'ab': 'M2',
-        'ac': 'm3',
-        'ad': 'P4',
-        'ae': 'P5',
-        'af': 'm6',
-        'ag': 'm7',
-
-        'bb': 'P1',
-        'bc': 'm2',
-        'bd': 'm3',
-        'be': 'P4',
-        'bf': 'd5',
-        'bg': 'm6',
-        'ba': 'm7',
+        'd8': 48/25, # dimished octave
+        'P8': 2, # octave
     }
 
     # Get desired ratios according to semantics
     ratio_desired = np.array(
-        [_semantics[_map[p0[0] + p0[1]]] for p0 in pairs])
+        [_semantics[_name_to_inverval(p0)] for p0 in pairs])
 
     # Get starting frequencies for notes (equal temperment)
     _nominal_freqs = {
+        'abb': 783.99,
+        'ab': 415.30,
         'a': 440,
+        'bbb': 440,
+        'a#': 466.16,
+        'bb': 466.16,
         'b': 493.88,
+        'b#': 523.25,
+        'cb': 493.88,
         'c': 523.25,
+        'dbb': 523.25,
+        'c#': 554.37,
+        'db': 554.37,
         'd': 587.33,
+        'ebb': 587.33,
+        'd#': 622.25,
+        'eb': 622.25,
         'e': 659.25,
+        'e#': 698.46,
+        'fb': 659.25,
         'f': 698.46,
+        'f#': 739.99,
+        'gb': 739.99,
         'g': 783.99,
+        'g#': 830.61,
     }
     freq_init = [_nominal_freqs[n0] for n0 in notes]
     ratio_init = _get_ratios(freq_init)
