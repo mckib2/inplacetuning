@@ -4,7 +4,8 @@ References
 ----------
 .. [1] https://en.wikipedia.org/wiki/Just_intonation
 .. [2] https://pages.mtu.edu/~suits/notefreqs.html
-.. [2] https://en.wikipedia.org/wiki/Interval_(music)
+.. [3] https://en.wikipedia.org/wiki/Interval_(music)
+.. [4] http://www.huygens-fokker.org/docs/intervals.html
 '''
 
 from collections import OrderedDict
@@ -12,249 +13,7 @@ from collections import OrderedDict
 import numpy as np
 from scipy.optimize import minimize
 
-def _name_to_inverval(pair):
-    '''Lookup interval from pair of notes.'''
-
-    return {
-
-        ('cbb', 'cbb'): 'P1',
-        ('cbb', 'cb'): 'A1',
-        ('cbb', 'dbbbb'): 'd2',
-        ('cbb', 'dbbb'): 'm2',
-        ('cbb', 'dbb'): 'M2',
-        ('cbb', 'db'): 'A2',
-        ('cbb', 'ebbbb'): 'd3',
-        ('cbb', 'ebbb'): 'm3',
-        ('cbb', 'ebb'): 'M3',
-        ('cbb', 'eb'): 'A3',
-        ('cbb', 'fbbb'): 'd4',
-        ('cbb', 'fbb'): 'P4',
-        ('cbb', 'fb'): 'A4',
-        ('cbb', 'gbbb'): 'd5',
-        ('cbb', 'gbb'): 'P5',
-        ('cbb', 'gb'): 'A5',
-        ('cbb', 'abbbb'): 'd6',
-        ('cbb', 'abbb'): 'm6',
-        ('cbb', 'abb'): 'M6',
-        ('cbb', 'ab'): 'A6',
-        ('cbb', 'bbbbb'): 'd7',
-        ('cbb', 'bbbb'): 'm7',
-        ('cbb', 'bbb'): 'M7',
-        ('cbb', 'bb'): 'A7',
-        ('cbb', 'cbbb'): 'd8',
-
-        ('cb', 'cb'): 'P1',
-        ('cb', 'c'): 'A1',
-        ('cb', 'dbbb'): 'd2',
-        ('cb', 'dbb'): 'm2',
-        ('cb', 'db'): 'M2',
-        ('cb', 'd'): 'A2',
-        ('cb', 'ebbb'): 'd3',
-        ('cb', 'ebb'): 'm3',
-        ('cb', 'eb'): 'M3',
-        ('cb', 'e'): 'A3',
-        ('cb', 'fbb'): 'd4',
-        ('cb', 'fb'): 'P4',
-        ('cb', 'f'): 'A4',
-        ('cb', 'gbb'): 'd5',
-        ('cb', 'gb'): 'P5',
-        ('cb', 'g'): 'A5',
-        ('cb', 'abbb'): 'd6',
-        ('cb', 'abb'): 'm6',
-        ('cb', 'ab'): 'M6',
-        ('cb', 'a'): 'A6',
-        ('cb', 'bbbb'): 'd7',
-        ('cb', 'bbb'): 'm7',
-        ('cb', 'bb'): 'M7',
-        ('cb', 'b'): 'A7',
-        ('cb', 'cbb'): 'd8',
-
-        ('c', 'c'): 'P1',
-        ('c', 'c#'): 'A1',
-        ('c', 'c##'): 'm2', # technically?
-        ('c', 'dbb'): 'd2',
-        ('c', 'db'): 'm2',
-        ('c', 'd'): 'M2',
-        ('c', 'd#'): 'A2',
-        ('c', 'ebb'): 'd3',
-        ('c', 'eb'): 'm3',
-        ('c', 'e'): 'M3',
-        ('c', 'e#'): 'A3',
-        ('c', 'fb'): 'd4',
-        ('c', 'f'): 'P4',
-        ('c', 'f#'): 'A4',
-        ('c', 'gb'): 'd5',
-        ('c', 'g'): 'P5',
-        ('c', 'g#'): 'A5',
-        ('c', 'abb'): 'd6',
-        ('c', 'ab'): 'm6',
-        ('c', 'a'): 'M6',
-        ('c', 'a#'): 'A6',
-        ('c', 'bbb'): 'd7',
-        ('c', 'bb'): 'm7',
-        ('c', 'b'): 'M7',
-        ('c', 'b#'): 'A7',
-        ('c', 'cb'): 'd8',
-
-        ('c#', 'c#'): 'P1',
-        ('c#', 'c##'): 'A1',
-        ('c#', 'db'): 'd2',
-        ('c#', 'd'): 'm2',
-        ('c#', 'd#'): 'M2',
-        ('c#', 'd##'): 'A2',
-        ('c#', 'eb'): 'd3',
-        ('c#', 'e'): 'm3',
-        ('c#', 'e#'): 'M3',
-        ('c#', 'e##'): 'A3',
-        ('c#', 'f'): 'd4',
-        ('c#', 'f#'): 'P4',
-        ('c#', 'f##'): 'A4',
-        ('c#', 'g'): 'd5',
-        ('c#', 'g#'): 'P5',
-        ('c#', 'g##'): 'A5',
-        ('c#', 'ab'): 'd6',
-        ('c#', 'a'): 'm6',
-        ('c#', 'a#'): 'M6',
-        ('c#', 'a##'): 'A6',
-        ('c#', 'bb'): 'd7',
-        ('c#', 'b'): 'm7',
-        ('c#', 'b#'): 'M7',
-        ('c#', 'b##'): 'A7',
-        ('c#', 'c'): 'd8',
-
-        ('c##', 'c##'): 'P1',
-        ('c##', 'd'): 'd2',
-
-        ('dbb', 'dbb'): 'P1',
-
-        ('db', 'db'): 'P1',
-
-        ('d', 'd'): 'P1',
-        ('d', 'd#'): 'A1',
-        ('d', 'ebb'): 'd2',
-        ('d', 'eb'): 'm2',
-        ('d', 'e'): 'M2',
-        ('d', 'e#'): 'A2',
-        ('d', 'fb'): 'd3',
-        ('d', 'f'): 'm3',
-        ('d', 'f#'): 'M3',
-        ('d', 'f##'): 'A3',
-        ('d', 'gb'): 'd4',
-        ('d', 'g'): 'P4',
-        ('d', 'g#'): 'A4',
-        ('d', 'ab'): 'd5',
-        ('d', 'a'): 'P5',
-        ('d', 'a#'): 'A5',
-        ('d', 'bbb'): 'd6',
-        ('d', 'bb'): 'm6',
-        ('d', 'b'): 'M6',
-        ('d', 'b#'): 'A6',
-        ('d', 'cb'): 'd7',
-        ('d', 'c'): 'm7',
-        ('d', 'c#'): 'M7',
-        ('d', 'c##'): 'A7',
-        ('d', 'db'): 'd8',
-
-        ('d#', 'd#'): 'P1',
-
-        ('d##', 'd##'): 'P1',
-
-        ('ebb', 'ebb'): 'P1',
-
-        ('eb', 'eb'): 'P1',
-
-        ('e', 'e'): 'P1',
-        ('e', 'f'): 'm2',
-        ('e', 'g'): 'm3',
-        ('e', 'a'): 'P4',
-        ('e', 'b'): 'P5',
-        ('e', 'c'): 'm6',
-        ('e', 'd'): 'm7',
-
-        ('e#', 'e#'): 'P1',
-
-        ('e##', 'e##'): 'P1',
-
-        ('fb', 'fb'): 'P1',
-
-        ('f', 'f'): 'P1',
-        ('f', 'g'): 'M2',
-        ('f', 'a'): 'M3',
-        ('f', 'b'): 'A4',
-        ('f', 'c'): 'P5',
-        ('f', 'd'): 'M6',
-        ('f', 'e'): 'M7',
-
-        ('f#', 'f#'): 'P1',
-
-        ('f##', 'f##'): 'P1',
-
-        ('gb', 'gb'): 'P1',
-
-        ('g', 'g'): 'P1',
-        ('g', 'a'): 'M2',
-        ('g', 'b'): 'M3',
-        ('g', 'c'): 'P4',
-        ('g', 'd'): 'P5',
-        ('g', 'e'): 'M6',
-        ('g', 'f'): 'm7',
-
-        ('g#', 'g#'): 'P1',
-
-        ('g##', 'g##'): 'P1',
-
-        ('abb', 'abb'): 'P1',
-        ('abb', 'c'): 'A3',
-
-        ('ab', 'ab'): 'P1',
-        ('ab', 'c'): 'M3',
-        ('ab', 'c#'): 'A3',
-        ('ab', 'd'): 'A4',
-
-        ('a', 'a'): 'P1',
-        ('a', 'b'): 'M2',
-        ('a', 'c'): 'm3',
-        ('a', 'c#'): 'M3',
-        ('a', 'd'): 'P4',
-        ('a', 'e'): 'P5',
-        ('a', 'f'): 'm6',
-        ('a', 'g'): 'm7',
-
-        ('a#', 'a#'): 'P1',
-        ('a#', 'c'): 'd3',
-        ('a#', 'c#'): 'm3',
-        ('a#', 'd'): 'd4',
-
-        ('a##', 'a##'): 'P1',
-        ('a##', 'c#'): 'd3',
-
-        ('bbb', 'bbb'): 'P1',
-        ('bbb', 'c'): 'A2',
-        ('bbb', 'd'): 'A3',
-
-        ('bb', 'bb'): 'P1',
-        ('bb', 'c'): 'M2',
-        ('bb', 'c#'): 'A2',
-        ('bb', 'd'): 'M3',
-
-        ('b', 'b'): 'P1',
-        ('b', 'c'): 'm2',
-        ('b', 'c#'): 'M2',
-        ('b', 'd'): 'm3',
-        ('b', 'e'): 'P4',
-        ('b', 'f'): 'd5',
-        ('b', 'g'): 'm6',
-        ('b', 'a'): 'm7',
-
-        ('b#', 'b#'): 'P1',
-        ('b#', 'c'): 'd2',
-        ('b#', 'c#'): 'm2',
-        ('b#', 'd'): 'd3',
-
-        ('b##', 'b##'): 'P1',
-        ('b##', 'c#'): 'd2',
-
-    }[pair]
+from utils import _name_to_inverval
 
 def combinations(x):
     '''Pairwise combinations in predictable order.'''
@@ -322,7 +81,7 @@ def inplacetuning(notes):
         'Invalid note name provided!')
 
     # Get all pairwise relationships we need to optimize over
-    notes = sorted(notes) # rest of code assumes lexigraphic order
+    # notes = sorted(notes) # rest of code assumes lexigraphic order
     pairs = combinations(notes)
 
     # Define what we "mean" when we say [interval type] between two
@@ -330,24 +89,44 @@ def inplacetuning(notes):
     _semantics = {
         'P1': 1, # unison
         'A1': 25/24, # augmented unison
+        'AA1': 1125/1024, # double augmented unison
+        'dd2': 135/128, # double dimished second (maybe?)
         'd2': 128/125, # dimished second
         'm2': 16/15, # minor second
         'M2': 9/8, # major second
         'A2': 75/64, # augmented second
+        'AA2': 10125/8192, # doubly augmented second
+        'dd3': 2048/1875, # doubly dimished third
         'd3': 144/125, # dimished third
         'm3': 6/5, # minor third
         'M3': 5/4, # major third
         'A3': 125/96, # Augmented third
+        'AA3': 5625/4096, # double augmented third
+        'dd4': 4096/3375, # doubly dimished fourth
         'd4': 32/25, # dimished fourth
         'P4': 4/3, # perfect fourth
         'A4': 45/32, # augmented fourth
+        'AA4': 375/256, # double augmented fourth
+        'AAA4': 8/5, # triply augmented fourth (copy m6?)
+        'ddd5': 5/4, # triply dimished fifth (copy M3?)
+        'dd5': 512/375, # doubly dimished fifth
         'd5': 25/18, # dimished fifth
         'P5': 3/2, # perfect fifth
         'A5': 25/16, # augmented fifth
+        'AA5': 3375/2048, # double augmented fifth
+        'dd6': 8192/5625, # doubly dimished sixth
+        'd6': 192/125, # dimished sixth
         'm6': 8/5, # minor sixth
         'M6': 5/3, # major sixth
+        'A6': 125/72, # augmented sixth
+        'AA6': 1875/1024, # double augmented sixth
+        'dd7': 16384/10125, # doubly dimished seventh
+        'd7': 128/75, # dimished seventh
         'm7': 16/9, # minor seventh
         'M7': 15/8, # major seventh
+        'A7': 125/64, # augmented seventh
+        'AA7': 1162261467/536870912, # double augmented seventh (Pyth)
+        'dd8': 2048/1125, # doubly dimished octave
         'd8': 48/25, # dimished octave
         'P8': 2, # octave
     }
@@ -417,18 +196,4 @@ def inplacetuning(notes):
 
 
 if __name__ == '__main__':
-
-    # notes = ['c', 'e', 'g']
-    # notes = ['d', 'f', 'a', 'c', 'e']
-    # notes = ['e', 'g', 'b']
-    notes = ['f', 'a', 'c', 'e']
-    (freq_opt, freq_eq,
-     ratio_opt, ratio_desired, ratio_init,
-     cost) = inplacetuning(notes)
-
-    print(freq_eq)
-    print(freq_opt)
-    print(ratio_desired)
-    print(ratio_opt)
-    print(ratio_init)
-    print(cost)
+    pass
