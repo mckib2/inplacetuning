@@ -6,6 +6,7 @@ References
 .. [2] https://pages.mtu.edu/~suits/notefreqs.html
 .. [3] https://en.wikipedia.org/wiki/Interval_(music)
 .. [4] http://www.huygens-fokker.org/docs/intervals.html
+.. [5] https://www.musictheory.net/calculators/interval
 '''
 
 from collections import OrderedDict

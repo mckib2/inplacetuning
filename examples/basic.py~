@@ -1,0 +1,7 @@
+'''Basic usage of inplace tuning.'''
+
+from inplacetuning import inplacetuning
+
+if __name__ == '__main__':
+
+    fopt, feq, ropt, rdes, rinit, cost = inplacetuning(['c', 'e', 'g'])
