@@ -39,6 +39,6 @@ comparison.
 
 References
 ==========
-[1] Adam Neely's YouTube Channel https://www.youtube.com/user/havic5/videos
-[2] Polansky, Larry, et al. "A mathematical model for optimal tuning systems."
+.. [1] Adam Neely's YouTube Channel https://www.youtube.com/user/havic5/videos
+.. [2] Polansky, Larry, et al. "A mathematical model for optimal tuning systems."
     Perspectives of new music (2009): 69-110.
